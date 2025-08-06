@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Curricular - RRII (Plan 2015)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .column {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      width: 260px;
+    }
+    .column h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .subject {
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      background: #e3f2fd;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .subject.approved {
+      background: #c8e6c9;
+      text-decoration: line-through;
+    }
+    .subject.locked {
+      background: #eeeeee;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .subject:hover:not(.locked) {
+      background: #bbdefb;
+    }
+    .subject[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 5px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <h1>Licenciatura en Relaciones Internacionales – Plan 2015</h1>
+  <div class="grid" id="curriculum"></div>
+
+  <script>
+    const subjects = [
+      // 1er año
+      { id: "gpo0281", name: "Introducción a las Ciencias Políticas", year: 1, sem: 1, prerequisites: [] },
+      { id: "gde0285", name: "Introducción al Derecho", year: 1, sem: 1, prerequisites: [] },
+      { id: "ghi0121", name: "Historia de las Ideas Políticas I", year: 1, sem: 1, prerequisites: [] },
+      { id: "ghi0280", name: "Historia Política Contemporánea", year: 1, sem: 1, prerequisites: [] },
+      { id: "gff0781", name: "Filosofía y Antropología", year: 1, sem: 1, prerequisites: [] },
+      { id: "gpo0127", name: "Introducción a las Relaciones Internacionales", year: 1, sem: 2, prerequisites: [] },
+      { id: "gec0172", name: "Macroeconomía", year: 1, sem: 2, prerequisites: [] },
+      { id: "gsc1287", name: "Sociología", year: 1, sem: 2, prerequisites: [] },
+      { id: "ghi0128", name: "Historia de las Ideas Políticas II", year: 1, sem: 2, prerequisites: ["ghi0121"] },
+      { id: "gff0782", name: "Seminario I", year: 1, sem: 2, prerequisites: ["gff0781"] },
+      { id: "gpo0226", name: "Ciencia Política I", year: 1, sem: 2, prerequisites: ["gpo0281"] },
+
+      // 2do año
+      { id: "ghi0288", name: "Historia Argentina I", year: 2, sem: 1, prerequisites: [] },
+      { id: "ghi0248", name: "Historia de las Ideas Políticas III", year: 2, sem: 1, prerequisites: ["ghi0128"] },
+      { id: "gso0286", name: "Metodología de la Investigación Social", year: 2, sem: 1, prerequisites: [] },
+      { id: "gff0793", name: "Ética y sus Fundamentos", year: 2, sem: 1, prerequisites: ["gff0781"] },
+      { id: "gff0784", name: "Introducción a la Teología", year: 2, sem: 1, prerequisites: ["gff0781"] },
+      { id: "gge0249", name: "Geografía Política y Económica LA y Argentina", year: 2, sem: 2, prerequisites: [] },
+      { id: "ghi0289", name: "Historia Argentina II", year: 2, sem: 2, prerequisites: ["ghi0288"] },
+      { id: "gde0235", name: "Teoría y Derecho Constitucional", year: 2, sem: 2, prerequisites: ["gde0285"] },
+      { id: "gli0220", name: "Inglés I (RCC)", year: 2, sem: 2, prerequisites: [] },
+      { id: "gff0795", name: "Seminario II", year: 2, sem: 2, prerequisites: ["gff0793", "gff0784"] },
+
+      // 3er año
+      { id: "gpo0321", name: "Ciencia Política II", year: 3, sem: 1, prerequisites: ["gpo0281"] },
+      { id: "gpo0348", name: "Teoría de las Relaciones Internacionales", year: 3, sem: 1, prerequisites: ["gpo0127"] },
+      { id: "gpo0326", name: "Gobierno y Administración de la RA", year: 3, sem: 1, prerequisites: ["gde0235"] },
+      { id: "gec0351", name: "Economía del Sector Público", year: 3, sem: 1, prerequisites: ["gec0172"] },
+      { id: "gff0786", name: "Síntesis Teológica", year: 3, sem: 1, prerequisites: ["gff0784"] },
+      { id: "gli0320", name: "Inglés II (RCC)", year: 3, sem: 1, prerequisites: ["gli0220"] },
+      { id: "gpo0331", name: "Política Comparada", year: 3, sem: 2, prerequisites: [] },
+      { id: "gec0315", name: "Economía Internacional", year: 3, sem: 2, prerequisites: [] },
+      { id: "ges0355", name: "Métodos Cuantitativos", year: 3, sem: 2, prerequisites: ["gso0286"] },
+      { id: "ghi0394", name: "Historia Política de América", year: 3, sem: 2, prerequisites: [] },
+      { id: "gpo0356", name: "Política Exterior Argentina", year: 3, sem: 2, prerequisites: [] },
+      { id: "gff0787", name: "Seminario III", year: 3, sem: 2, prerequisites: ["gff0786"] },
+
+      // 4to año
+      { id: "gpo0423", name: "Historia de las Relaciones Internacionales", year: 4, sem: 1, prerequisites: [] },
+      { id: "gpo0425", name: "Política Internacional Contemporánea", year: 4, sem: 1, prerequisites: ["gpo0348"] },
+      { id: "gde0414", name: "Derecho Internacional Público", year: 4, sem: 1, prerequisites: [] },
+      { id: "gff0788", name: "Moral y Compromiso Social", year: 4, sem: 1, prerequisites: ["gff0793", "gff0784"] },
+      { id: "gpo0428", name: "Seminario de Investigación", year: 4, sem: 1, prerequisites: [] },
+      { id: "gpo0421", name: "América Latina en la Política Internacional", year: 4, sem: 2, prerequisites: ["ghi0394"] },
+      { id: "gpo9425", name: "Política Económica Argentina", year: 4, sem: 2, prerequisites: ["gec0351"] },
+      { id: "gpo9428", name: "Estrategia y Seguridad Internacional", year: 4, sem: 2, prerequisites: ["gpo0348"] },
+      { id: "gpo0418", name: "Organismos Internacionales", year: 4, sem: 2, prerequisites: ["gde0414"] },
+      { id: "gff0789", name: "Seminario IV", year: 4, sem: 2, prerequisites: ["gff0788"] },
+
+      // Trabajo Final
+      { id: "gwa9499", name: "Trabajo Final de la Carrera", year: 4, sem: 2, prerequisites: [
+        "gpo0423", "gpo0425", "gde0414", "gff0788", "gpo0428",
+        "gpo0421", "gpo9425", "gpo9428", "gpo0418", "gff0789"
+      ]}
+    ];
+
+    const storageKey = "rii_plan2015_aprobadas";
+
+    function loadApproved() {
+      return JSON.parse(localStorage.getItem(storageKey) || "[]");
+    }
+
+    function saveApproved(list) {
+      localStorage.setItem(storageKey, JSON.stringify(list));
+    }
+
+    function isUnlocked(subject, approved) {
+      return subject.prerequisites.every(id => approved.includes(id));
+    }
+
+    function render() {
+      const container = document.getElementById("curriculum");
+      container.innerHTML = "";
+
+      const approved = loadApproved();
+      const years = [...new Set(subjects.map(s => s.year))].sort();
+
+      years.forEach(year => {
+        const column = document.createElement("div");
+        column.className = "column";
+        column.innerHTML = <h2>${year}° Año</h2>;
+
+        subjects.filter(s => s.year === year).forEach(subject => {
+          const div = document.createElement("div");
+          div.className = "subject";
+          div.textContent = subject.name;
+          div.dataset.id = subject.id;
+
+          const unlocked = isUnlocked(subject, approved);
+
+          if (!unlocked) {
+            div.classList.add("locked");
+            const faltantes = subject.prerequisites
+              .filter(p => !approved.includes(p))
+              .map(p => subjects.find(s => s.id === p)?.name || p)
+              .join(", ");
+            div.title = Falta: ${faltantes};
+          } else {
+            if (approved.includes(subject.id)) {
+              div.classList.add("approved");
+            }
+            div.addEventListener("click", () => toggle(subject.id));
+          }
+
+          column.appendChild(div);
+        });
+
+        container.appendChild(column);
+      });
+    }
+
+    function toggle(id) {
+      let approved = loadApproved();
+      if (approved.includes(id)) {
+        approved = approved.filter(i => i !== id);
+      } else {
+        approved.push(id);
+      }
+      saveApproved(approved);
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
